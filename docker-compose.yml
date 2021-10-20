@@ -1,0 +1,48 @@
+version: "3"
+services:
+
+  db:
+    image: mysql
+    container_name: database_docker_symfony
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    networks:
+      - dev
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin_docker_symfony
+    restart: always
+    # démarre lorsque le container "db" est lancé
+    depends_on:
+        - db
+    # Port_hote:Port_Container
+    ports:
+        - 8080:80
+    # l'hôte est le conteneur db
+    environment:
+        PMA_HOST: db
+    networks:
+        - dev
+
+  php:
+    # docker va chercher un dockerfile dans le dossier /php
+    build: php
+    container_name: php_docker_symfony
+    ports:
+      - "4413:80"
+    volumes:
+      - ./php/vhosts:/etc/apache2/sites-enabled
+      - ./:/var/www
+    restart: always
+    networks:
+      - dev
+
+networks:
+  dev:
+
+volumes:
+  db_data:
